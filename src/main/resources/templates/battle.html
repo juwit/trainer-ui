@@ -1,0 +1,170 @@
+{{> layout/header}}
+
+<body>
+
+<div class="container">
+    <h1 class="pt-md-5 pb-md-5">Arena <img src="/icons/fist.png" style="width: 32px;"/></h1>
+
+    <h2>{{player1.name}} Vs {{player2.name}}</h2>
+
+    <div class="gameZone" style="width: 800px; height: 480px; position:relative; background: url('/images/battle_background.png')">
+
+        <img id="myPokemon" style="position:absolute;  width: 300px; left: 0px; bottom: 0px;"/>
+        <img id="opponentPokemon" style="position:absolute; width: 200px; right: 100px; top: 100px;"/>
+
+        <div class="card bg-light" style="width: 18rem; position:absolute; bottom:10px; right: 10px; ">
+            <div class="card-body">
+                <h5 class="card-title" id="myPokemonName"></h5>
+                <p>
+                    <div class="progress">
+                        <div class="progress-bar" id="myHp" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </p>
+
+                <button class="btn btn-danger" id="attack-btn" onclick="attack();">Attack</button>
+            </div>
+        </div>
+
+        <div class="card bg-light" style="width: 18rem; position:absolute; top: 10px; left: 10px;">
+            <div class="card-body">
+                <h5 class="card-title" id="opponentPokemonName"></h5>
+                <p>
+                    <div class="progress">
+                        <div class="progress-bar" id="opponentHp" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<script type="text/javascript">
+    let battle;
+    $.post("/api/battles?trainer={{player1.name}}&opponent={{player2.name}}")
+        .then(result => {
+            battle = result;
+
+            refreshBattle();
+        });
+
+    function checkBattleEnd(){
+        // battle ends if all pokemons of a trainer are KO !
+        if(battle.trainerPokemons.every(poke => poke.KO === true)){
+            // show the battle end
+            console.log("You Lost !");
+            return true;
+        }
+        if(battle.opponentPokemons.every(poke => poke.KO === true)){
+            console.log("You win !");
+            return true;
+        }
+    }
+
+    function refreshBattle(){
+        if(checkBattleEnd()){
+            return;
+        }
+
+        let myPokemon = battle.trainerPokemons.find(poke => poke.alive === true);
+        let opponentPokemon = battle.opponentPokemons.find(poke => poke.alive === true);
+
+        // check if pokemon changed (KO)
+        if($("#myPokemonName").text() !== myPokemon.type.name){
+            // set the bar to 0
+            $("#myHP").attr("aria-valuenow",0);
+            $("#myHp").css("width",`0%` );
+            zoomOut('#myPokemon', () => {
+                updateMyPokemon();
+            });
+        }
+        else{
+            updateMyPokemon();
+        }
+        if($("#opponentPokemonName").text() !== opponentPokemon.type.name){
+            // set the bar to 0
+            $("#opponentHp").attr("aria-valuenow",0);
+            $("#opponentHp").css("width",`0%` );
+            zoomOut('#opponentPokemon', () => {
+                updateOpponentPokemon();
+            });
+        }
+        else{
+            updateOpponentPokemon();
+        }
+    }
+
+    function updateMyPokemon(){
+        let myPokemon = battle.trainerPokemons.find(poke => poke.alive === true);
+        let myPokemonImage = myPokemon.type.sprites.back_default;
+
+        $("#myPokemon").attr("src", myPokemonImage);
+        $("#myPokemonName").text(myPokemon.type.name);
+        $("#myHp").text(myPokemon.hp);
+        $("#myHp").attr("aria-valuemax",myPokemon.maxHp);
+        $("#myHp").attr("aria-valuenow",myPokemon.hp);
+        $("#myHp").css("width",`${myPokemon.hp * 100 / myPokemon.maxHp}%` );
+    }
+
+    function updateOpponentPokemon(){
+        let opponentPokemon = battle.opponentPokemons.find(poke => poke.alive === true);
+        let opponentPokemonImage = opponentPokemon.type.sprites.front_default;
+
+        $("#opponentPokemon").attr("src", opponentPokemonImage);
+        $("#opponentPokemonName").text(opponentPokemon.type.name);
+        $("#opponentHp").text(opponentPokemon.hp);
+        $("#opponentHp").attr("aria-valuemax",opponentPokemon.maxHp);
+        $("#opponentHp").attr("aria-valuenow",opponentPokemon.hp);
+        $("#opponentHp").css("width",`${opponentPokemon.hp * 100 / opponentPokemon.maxHp}%` );
+    }
+
+    function attack(){
+        $("#attack-btn").attr("disabled","disabled");
+        sendAttack().then( () => {
+            animateCss('#myPokemon', 'bounce', () => {
+                animateCss('#opponentPokemon', 'flash', () => {
+                    refreshBattle();
+                    $("#attack-btn").removeAttr("disabled");
+                });
+            });
+        });
+    }
+
+    function sendAttack(){
+        return $.post(`/api/battles/${battle.uuid}`).then(result => {
+            battle = result;
+        });
+    }
+
+    function zoomOut(element, callback){
+        const node = document.querySelector(element);
+        node.classList.add('animated', "zoomOut");
+
+        function handleAnimationEnd() {
+            node.removeEventListener('animationend', handleAnimationEnd);
+
+            if (typeof callback === 'function') callback()
+        }
+
+        node.addEventListener('animationend', handleAnimationEnd)
+    }
+
+    function animateCss(element, animationName, callback) {
+        const node = document.querySelector(element);
+        node.classList.add('animated', animationName);
+
+        function handleAnimationEnd() {
+            node.classList.remove('animated', animationName);
+            node.removeEventListener('animationend', handleAnimationEnd);
+
+            if (typeof callback === 'function') callback()
+        }
+
+        node.addEventListener('animationend', handleAnimationEnd)
+    }
+</script>
+
+</body>
+</html>

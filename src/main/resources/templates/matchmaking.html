@@ -1,0 +1,55 @@
+{{> layout/header}}
+
+<body>
+
+<div class="container">
+    <h1 class="pt-md-5 pb-md-5">Arena <img src="/icons/fist.png" style="width: 32px;"/></h1>
+
+    <form action="./matchmaking" method="POST">
+
+    <div class="card-deck">
+
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal"><img src="/icons/player.png" style="width: 32px;"/> Select player One</h4>
+                </div>
+                <div class="card-body">
+
+                    <select name="player1" class="custom-select custom-select-lg mb-3">
+                        <option selected>Open this select menu</option>
+                        {{#trainers}}
+                        <option value="{{name}}">{{name}}</option>
+                        {{/trainers}}
+                    </select>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal"><img src="/icons/player.png" style="width: 32px;"/> Select player Two</h4>
+                </div>
+                <div class="card-body">
+                    <select name="player2" class="custom-select custom-select-lg mb-3">
+                        <option selected>Open this select menu</option>
+                        {{#trainers}}
+                        <option value="{{name}}">{{name}}</option>
+                        {{/trainers}}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <button type="submit" href="#" class="btn btn-primary"><img src="/icons/fist.png" style="width: 32px;"/> Fight !</button>
+
+    </form>
+
+</div>
+
+</body>
+</html>
