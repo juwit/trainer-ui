@@ -48,4 +48,8 @@ public class Pokemon {
     public void setType(PokemonType type) {
         this.type = type;
     }
+
+    public PokemonType getType() {
+        return type;
+    }
 }

@@ -4,11 +4,13 @@
 
     {{> layout/navbar}}
 
+
+{{#trainer}}
 <div class="container">
-    <h1 class="pt-md-5 pb-md-5">Pokedex</h1>
+    <h1 class="pt-md-5 pb-md-5">{{name}}</h1>
 
     <div class="card-deck">
-        {{#pokemonTypes}} <!--1-->
+        {{#team}}{{#type}} <!--1-->
         <div class="col-md-3">
             <div class="card shadow-sm mb-3">
                 <div class="card-header">
@@ -24,10 +26,11 @@
                 </div>
             </div>
         </div>
-        {{/pokemonTypes}}
+        {{/type}}{{/team}}
     </div>
 
 </div>
+{{/trainer}}
 
 </body>
 </html>

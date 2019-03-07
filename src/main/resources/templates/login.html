@@ -1,0 +1,36 @@
+{{> layout/header}}
+
+<body>
+
+{{> layout/navbar}}
+
+
+<div class="container">
+    <h1 class="pt-md-5 pb-md-5">Pokemon Manager - Login</h1> <!--3-->
+
+    <div class="row">
+        <img  src="/images/chen.png" class="col-md-2"/> <!--1-->
+
+        <div class="row col-md-10">
+
+
+            <form action="/login" method="post">
+                <div class="form-group">
+                    <label> User Name : <input type="text" class="form-control" name="username"/> </label>
+                </div>
+                <div class="form-group">
+                    <label> Password: <input type="password"  class="form-control" name="password"/> </label>
+                </div>
+                <input type="hidden" name="{{_csrf.parameterName}}" value="{{_csrf.token}}"/>
+                <div>
+                    <input type="submit" class="btn btn-primary" value="Sign In"/>
+                </div>
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

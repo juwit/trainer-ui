@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.security.Principal;
+
 /**
  * Controller for BattleGame
  */
@@ -19,10 +21,10 @@ public class BattleController {
     private TrainerService trainerService;
 
     @GetMapping("/matchmaking")
-    public ModelAndView matchmaking(){
+    public ModelAndView matchmaking(Principal principal){
         var modelAndView = new ModelAndView("matchmaking");
 
-        modelAndView.addObject("trainers", trainerService.getAllTrainers());
+        modelAndView.addObject("trainers", trainerService.getAllTrainersExcept(principal.getName()));
 
         return modelAndView;
     }

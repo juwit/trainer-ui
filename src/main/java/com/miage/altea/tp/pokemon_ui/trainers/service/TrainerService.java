@@ -8,5 +8,5 @@ import java.util.List;
 public interface TrainerService {
     Trainer getTrainer(String name);
 
-    List<Trainer> getAllTrainers();
+    List<Trainer> getAllTrainersExcept(String trainerName);
 }

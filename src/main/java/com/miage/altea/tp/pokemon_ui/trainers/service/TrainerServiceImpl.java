@@ -5,6 +5,7 @@ import com.miage.altea.tp.pokemon_ui.pokemonTypes.service.PokemonTypeService;
 import com.miage.altea.tp.pokemon_ui.trainers.bo.Pokemon;
 import com.miage.altea.tp.pokemon_ui.trainers.bo.Trainer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -26,9 +27,10 @@ public class TrainerServiceImpl implements TrainerService{
     @Override
     public Trainer getTrainer(String name) {
         var trainer = restTemplate.getForObject(trainerServiceUrl+"/trainers/{name}", Trainer.class, name);
-
-        trainer.getTeam().parallelStream()
-                .forEach(this::setPokemonType);
+        if(trainer != null){
+            trainer.getTeam().parallelStream()
+                    .forEach(this::setPokemonType);
+        }
 
         return trainer;
     }
@@ -39,10 +41,13 @@ public class TrainerServiceImpl implements TrainerService{
     }
 
     @Override
-    public List<Trainer> getAllTrainers() {
+    public List<Trainer> getAllTrainersExcept(String trainerName) {
         var trainers = this.restTemplate.getForObject(trainerServiceUrl+"/trainers/", Trainer[].class);
 
         var trainersList = Arrays.asList(trainers);
+        trainersList = trainersList.parallelStream()
+                .filter(trainer -> ! trainerName.equals(trainer.getName()))
+                .collect(Collectors.toList());
 
         trainersList.parallelStream()
                 .flatMap(trainer -> trainer.getTeam().stream())
@@ -52,6 +57,7 @@ public class TrainerServiceImpl implements TrainerService{
     }
 
     @Autowired
+    @Qualifier("trainerApiRestTemplate")
     void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
