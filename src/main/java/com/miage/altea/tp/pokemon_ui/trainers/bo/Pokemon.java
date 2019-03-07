@@ -1,6 +1,8 @@
 package com.miage.altea.tp.pokemon_ui.trainers.bo;
 
 
+import com.miage.altea.tp.pokemon_ui.pokemonTypes.bo.PokemonType;
+
 public class Pokemon {
 
     private int id;
@@ -8,6 +10,8 @@ public class Pokemon {
     private int pokemonType;
 
     private int level;
+
+    private PokemonType type;
 
     public Pokemon() {
     }
@@ -41,4 +45,7 @@ public class Pokemon {
         this.level = level;
     }
 
+    public void setType(PokemonType type) {
+        this.type = type;
+    }
 }

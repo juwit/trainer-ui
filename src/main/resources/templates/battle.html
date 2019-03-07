@@ -21,7 +21,7 @@
                     </div>
                 </p>
 
-                <button class="btn btn-danger" id="attack-btn" onclick="attack();">Attack</button>
+                <button class="btn btn-danger" id="attack-btn" onclick="attack(me);">Attack</button>
             </div>
         </div>
 
@@ -43,6 +43,11 @@
 
 <script type="text/javascript">
     let battle;
+
+    let me = "{{player1.name}}";
+    let opponent = "{{player2.name}}";
+
+    // starting battle
     $.post("/api/battles?trainer={{player1.name}}&opponent={{player2.name}}")
         .then(result => {
             battle = result;
@@ -50,14 +55,22 @@
             refreshBattle();
         });
 
+    function startBattle(){
+        // start animation !
+
+
+    }
+
+
+
     function checkBattleEnd(){
         // battle ends if all pokemons of a trainer are KO !
-        if(battle.trainerPokemons.every(poke => poke.KO === true)){
+        if(battle.trainers[me].team.every(poke => poke.KO === true)){
             // show the battle end
             console.log("You Lost !");
             return true;
         }
-        if(battle.opponentPokemons.every(poke => poke.KO === true)){
+        if(battle.trainers[opponent].team.every(poke => poke.KO === true)){
             console.log("You win !");
             return true;
         }
@@ -68,8 +81,8 @@
             return;
         }
 
-        let myPokemon = battle.trainerPokemons.find(poke => poke.alive === true);
-        let opponentPokemon = battle.opponentPokemons.find(poke => poke.alive === true);
+        let myPokemon = battle.trainers[me].team.find(poke => poke.alive === true);
+        let opponentPokemon = battle.trainers[opponent].team.find(poke => poke.alive === true);
 
         // check if pokemon changed (KO)
         if($("#myPokemonName").text() !== myPokemon.type.name){
@@ -97,7 +110,7 @@
     }
 
     function updateMyPokemon(){
-        let myPokemon = battle.trainerPokemons.find(poke => poke.alive === true);
+        let myPokemon = battle.trainers[me].team.find(poke => poke.alive === true);
         let myPokemonImage = myPokemon.type.sprites.back_default;
 
         $("#myPokemon").attr("src", myPokemonImage);
@@ -109,7 +122,7 @@
     }
 
     function updateOpponentPokemon(){
-        let opponentPokemon = battle.opponentPokemons.find(poke => poke.alive === true);
+        let opponentPokemon = battle.trainers[opponent].team.find(poke => poke.alive === true);
         let opponentPokemonImage = opponentPokemon.type.sprites.front_default;
 
         $("#opponentPokemon").attr("src", opponentPokemonImage);
@@ -120,21 +133,25 @@
         $("#opponentHp").css("width",`${opponentPokemon.hp * 100 / opponentPokemon.maxHp}%` );
     }
 
-    function attack(){
+    function attack(trainer){
         $("#attack-btn").attr("disabled","disabled");
-        sendAttack().then( () => {
-            animateCss('#myPokemon', 'bounce', () => {
-                animateCss('#opponentPokemon', 'flash', () => {
-                    refreshBattle();
-                    $("#attack-btn").removeAttr("disabled");
+        sendAttack(trainer).then( result => {
+            if(result === "SUCCESS"){
+                // attaque réussie, on joue l'animation !
+                animateCss('#myPokemon', 'bounce', () => {
+                    animateCss('#opponentPokemon', 'flash', () => {
+                        refreshBattle();
+                        $("#attack-btn").removeAttr("disabled");
+                    });
                 });
-            });
+            }
         });
     }
 
-    function sendAttack(){
-        return $.post(`/api/battles/${battle.uuid}`).then(result => {
-            battle = result;
+    function sendAttack(trainer){
+        return $.post(`/api/battles/${battle.uuid}/${trainer}/attack`).then(battleCommandResult => {
+            battle = battleCommandResult.battle;
+            return Promise.resolve(battleCommandResult.result);
         });
     }
 
